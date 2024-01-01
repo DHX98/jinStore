@@ -1,0 +1,103 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <style>
+   body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #f7f7f7;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    form {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="submit"],
+    select {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+        background-color: #007aff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0051a8;
+    }
+
+    a {
+        color: #007aff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    p {
+        margin-top: 20px;
+    }
+
+    #flash-messages p {
+        color: red;
+    }
+
+    </style>
+    
+</head>
+<body>
+    
+
+
+    <!-- 注册表单 -->
+    <form action="/register" method="post">
+        <!-- 显示 flash 消息 -->
+        {% with messages = get_flashed_messages(category_filter=["error"]) %}
+            {% if messages %}
+                <div id="flash-messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        Username: <input type="text" name="username"><br>
+        Password: <input type="password" name="password"><br>
+        User Type: <select name="user_type">
+                       <option value="employee">Employee</option>
+                       <option value="admin">Admin</option>
+                   </select><br>
+        Admin Password: <input type="password" name="admin_password"><br>
+        <input type="submit" value="Register">
+        <p>Already have an account? <a href="/login">Login here</a></p>
+    </form>
+
+
+</body>
+</html>

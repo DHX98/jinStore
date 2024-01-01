@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales App</title>
+    <style>
+    body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f8f7;
+            color: #333;
+            margin: 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #007aff;
+        padding: 10px;
+        width: 100%; /* 确保宽度为100% */
+        box-sizing: border-box; /* 包含内边距和边框在内的总宽度 */
+        color: white;
+    }
+
+    .logout-button {
+        background-color: transparent;
+        color: white;
+        padding: 5px 10px;
+        border: none;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .logout-button:hover {
+        text-decoration: underline;
+    }
+
+    form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+        background-color: #007aff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0051a8;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            box-sizing: border-box;
+    }
+
+    th {
+        background-color: #f0f0f7;
+    }
+
+    .content {
+        width: 100%;
+        max-width: 800px; /* 设置最大宽度 */
+        margin: 0 auto; /* 水平居中 */
+        display: flex; /* 启用 flexbox */
+        flex-direction: column; /* 列方向布局 */
+        align-items: center; /* 子项居中 */
+        padding: 20px; /* 添加一些内边距 */
+    }
+
+    @media screen and (max-width: 600px) {
+
+        .top-bar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        form {
+                width: 90%;
+        }
+        
+        table {
+            width: 100%; 
+            overflow-x: auto;
+        }
+    }
+    
+    .flash-messages {
+            background-color: #fa8c35;
+            color: white; /* 白色文字 */
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            text-align: left; /* 左对齐文本 */
+        }
+
+    .flash-messages li {
+        list-style: none; /* 移除列表项符号 */
+    }
+
+    .daily-sales {
+        background-color: #f0f0f7;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .daily-sales h3 {
+        margin: 0;
+        color: #007aff;
+    }
+    </style>
+    
+    <script>
+        function validateForm() {
+            var refId = document.forms["salesForm"]["ref_id"].value;
+            var sellNum = document.forms["salesForm"]["sell_num"].value;
+            var buyNum = document.forms["salesForm"]["buy_num"].value;
+            var itemName = document.forms["salesForm"]["item_name"].value;
+            var sellDate = document.forms["salesForm"]["sell_date"].value;
+            var buyDate = document.forms["salesForm"]["buy_date"].value;
+            var dateFormat = /^\d{4}-\d{2}-\d{2}$/; // 正则表达式用于验证日期格式
+
+            if (refId === "" || itemName === "") {
+                alert("RefID and itemName cannot be empty.");
+                return false;
+            }
+
+            if (sellNum === "" && buyNum === "") {
+                alert("Please enter at least one of Sell Number or Buy Number.");
+                return false;
+            }
+
+            if (sellDate === "" && buyDate === "") {
+                alert("Please enter at least one of Sell Date or Buy Date.");
+                return false;
+            }
+
+            // 验证日期格式
+            if (sellDate && !sellDate.match(dateFormat)) {
+                alert("Sell Date must be in the format YYYY-MM-DD.");
+                return false;
+            }
+
+            if (buyDate && !buyDate.match(dateFormat)) {
+                alert("Buy Date must be in the format YYYY-MM-DD.");
+                return false;
+            }
+
+            return true;
+        }
+
+
+        function sortTable(columnIndex, type) {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("salesTable");
+            switching = true;
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+
+                    // 根据类型进行比较
+                    if (type === 'num') {
+                        if (parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (type === 'str') {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/all_average_sell_times')
+            .then(response => response.json())
+            .then(data => {
+                for (const [ref_id, average_time] of Object.entries(data)) {
+                    document.getElementById('average-time-' + ref_id).textContent = average_time.toFixed(2);
+                }
+            });
+        // 获取当前日期的销售总额
+        fetchDailySales();
+    });
+    
+    function fetchDailySales() {
+        fetch('/daily_sales')
+            .then(response => response.json())
+            .then(data => {
+                const today = new Date().toISOString().slice(0, 10); // 获取当前日期
+                const salesElement = document.getElementById('dailySales');
+                if (salesElement) {
+                    salesElement.innerHTML = `Daily Sales for ${today}: $${data[today] || 0}`;
+                }
+            })
+            .catch(error => console.error('Error fetching daily sales:', error));
+    }
+    function handleSubmit() {
+        if (!validateForm()) {
+            return false; // 阻止表单提交
+        }
+    }
+
+    </script>
+</head>
+<body>
+    <div class="top-bar">
+        <span class="username">Hello, {{ current_user.username }}</span>
+        <a href="/logout" class="logout-button">Logout</a>
+    </div>
+        <!-- 页面的主要内容 -->
+        <form name="salesForm" onsubmit="return handleSubmit()" method="POST">
+            Ref ID: <input type="text" name="ref_id"><br>
+            Sell Number: <input type="number" name="sell_num" min="0"><br>
+            Buy Number: <input type="number" name="buy_num" min="0"><br>
+            Item Name: <input type="text" name="item_name"><br>  <!-- 更改为 'item_name' -->
+            Buy Date: <input type="date" name="buy_date"><br>
+            Sell Date: <input type="date" name="sell_date"><br>
+            Landed Price: <input type="number" name="landed_price" step="0.01" min="0"><br> <!-- 到岸价 -->
+            Sale Price: <input type="number" name="sale_price" step="0.01" min="0"><br> <!-- 销售单价 -->
+            <input type="submit" value="Submit">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </form>
+        
+    <div class="daily-sales" id="dailySales">
+        <h3>Daily Sales: Loading...</h3>
+    </div>
+
+    <h2>Sales Data</h2>
+    <table id="salesTable" border="1">
+        <tr>
+            <th onclick="sortTable(0, 'str')">Ref ID</th>
+            <th onclick="sortTable(1, 'num')">Sell Number</th>
+            <th onclick="sortTable(2, 'num')">Buy Number</th>
+            <th onclick="sortTable(3, 'str')">Item Name</th>
+            <th onclick="sortTable(4, 'num')">Stock</th>
+            <th onclick="sortTable(5, 'num')">Landed Price</th> <!-- 到岸价 -->
+            <th onclick="sortTable(6, 'num')">Sale Price</th> <!-- 销售单价 -->
+            <th onclick="sortTable(7, 'num')">Average Sell Time (days)</th>
+            <th onclick="sortTable(8, 'str')">User Name</th>
+
+        </tr>
+        {% for sale in sales_data %}
+        <tr>
+            <td>{{ sale['ref_id'] }}</td>
+            <td>{{ sale['sell_num'] }}</td>
+            <td>{{ sale['buy_num'] }}</td>
+            <td>{{ sale['item_name'] }}</td> 
+            <td>{{ sale['stock'] }}</td>
+            <td>{{ sale['landed_price'] | default('N/A') }}</td> <!-- 显示到岸价 -->
+            <td>{{ sale['sale_price'] | default('N/A') }}</td> <!-- 显示销售单价 -->
+            <td id="average-time-{{ sale['ref_id'] }}">Loading...</td>
+            <td>{{ sale['user_name'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+</body>
+</html>
